@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_sudoku_v2/apps/app_assets.dart';
 import 'package:flutter_sudoku_v2/apps/app_theme.dart';
+import 'package:flutter_sudoku_v2/sudoku/sudoku_generator_v2.dart';
 import 'package:get/get.dart';
 
+import '../models/sudoku_generator_model.dart';
+import '../sudoku_generator.dart';
 import 'game_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -45,6 +48,7 @@ class _PageState extends State<HomePage> {
                 GestureDetector(
                   child: Container(
                     width: 200.w,
+                    height: 40.h,
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.all(Radius.circular(30.r)),
                         color: AppTheme.primaryColor
@@ -53,7 +57,12 @@ class _PageState extends State<HomePage> {
                     child: const Text('单机模式',style: TextStyle(color: Colors.white),),
                   ),
                   onTap: (){
-                    Get.to(const GamePage());
+                    // Get.to(const GamePage());
+                    SudokuGeneratorV2 generator = SudokuGeneratorV2();
+                    var board = generator.generate(60); // 生成难度为 5 的数独谜题
+                    print('board:$board size:${board.length}');
+                    var board1 = generator.solve(board);
+                    print('board1:$board1 size:${board1.length}');
                   },
                 )
               ],
