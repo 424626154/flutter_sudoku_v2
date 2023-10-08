@@ -14,10 +14,20 @@ class SudukuGroupMode {
       for (var j = 0; j < (cellNum ?? 0); j++) {
         var pX =  (gX ?? 0)*(cellNum ?? 0)+j;
         var pY = (gY ?? 0)*(cellNum ?? 0)+i;
-        var item = SudokuModel(value:0,pX: pX, pY: pY, gX: gX, gY: gY);
+        var item = SudokuModel(value:'.',pX: pX, pY: pY, gX: gX, gY: gY);
         rows.add(item);
       }
       gropup.add(rows);
     }
   }
+
+  @override
+  String toString() {
+    return {
+      'gX':gX,
+      'gY':gY,
+      // 'gropup':gropup
+    }.toString();
+  }
+
 }

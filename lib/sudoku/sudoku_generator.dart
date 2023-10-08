@@ -1,161 +1,45 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter_sudoku_v2/sudoku/difficulty_levels.dart';
+
 ///参考算法 https://github.com/robatron/sudoku.js/blob/master/sudoku.js
-class SudokuGeneratorV2 {
+class SudokuGenerator {
   // Define difficulties by how many squares are given to the player in a new
   // puzzle.
-  var difficultyMap = {
-    "easy": 62,
-    "medium": 53,
-    "hard": 44,
-    "very-hard": 35,
-    "insane": 26,
-    "inhuman": 17,
-  };
+  // 抽离出 DifficultyLevels
 
   int minGivens = 17; // Minimum number of givens
   int nrSquares = 81; // Number of squares
 
   String digits = "123456789";
-  String blankChar = '.';
+  static String blankChar = '.';
   String blankBoard =
-      ".................................................................................";
+      '.................................................................................';
+
+  String rows = "ABCDEFGHI"; // Row lables
+  String cols = '123456789'; // Column lables
 
   late List<String> squares;
+  late List<List<String>> units;
+  late Map<String, List<List<String>>> squareUnitsMap;
+  late Map squarePeersMap;
 
-  var rows = "ABCDEFGHI"; // Row lables
-  var cols = '123456789'; // Column lables
-  late List units;
-  late Map SQUARE_UNITS_MAP;
-
-  late Map SQUARE_PEERS_MAP;
-
-  SudokuGeneratorV2() {
+  SudokuGenerator() {
     squares = cross(rows, cols);
-    units = getAllUnits(rows, cols);
-    SQUARE_UNITS_MAP = _get_square_units_map(squares, units);
-    SQUARE_PEERS_MAP = _get_square_peers_map(squares, SQUARE_UNITS_MAP);
+    units = _getAllUnits(rows, cols);
+    squareUnitsMap = _getSquareUnitsMap(squares, units);
+    squarePeersMap = getSquarePeersMap(squares, squareUnitsMap);
   }
 
-  List<List<String>> getAllUnits(String rows, String cols) {
-    /* Return a list of all units (rows, cols, boxes)
-        */
-    List<List<String>> units = [];
-    List rowList = rows.split('');
-    // Rows
-    for (var ri in rowList) {
-      units.add(cross(ri, cols));
-    }
-    List colsList = cols.split('');
-    // Columns
-    for (var ci in colsList) {
-      units.add(cross(rows, ci));
-    }
-
-    // Boxes
-    var rowSquares = ["ABC", "DEF", "GHI"];
-    var colSquares = ["123", "456", "789"];
-
-    for (var rsi in rowSquares) {
-      for (var csi in colSquares) {
-        units.add(cross(rsi, csi));
-      }
-    }
-
-    return units;
+  ///生成数独
+  String? generateFromStr(String? difficultyStr) {
+    int? difficultyInt = DifficultyLevels.getDifficultyLevel(difficultyStr);
+    return generate(difficultyInt);
   }
 
-  Map _get_square_units_map(List squares, List units) {
-    /* Return a map of `squares` and their associated units (row, col, box)
-        */
-    var squareUnitMap = {};
-
-    // For every square...
-    for (var si in squares) {
-      var curSquare = si;
-
-      // Maintain a list of the current square's units
-      var curSquareUnits = [];
-
-      // Look through the units, and see if the current square is in it,
-      // and if so, add it to the list of of the square's units.
-      for (var ui in units) {
-        var curUnit = ui;
-
-        if (curUnit.indexOf(curSquare) != -1) {
-          curSquareUnits.add(curUnit);
-        }
-      }
-
-      // Save the current square and its units to the map
-      squareUnitMap[curSquare] = curSquareUnits;
-    }
-
-    return squareUnitMap;
-  }
-
-  Map _get_square_peers_map(squares, unitsMap) {
-    /* Return a map of `squares` and their associated peers, i.e., a set of
-        other squares in the square's unit.
-        */
-    var squarePeersMap = {};
-
-    // For every square...
-    for (var si in squares) {
-      var curSquare = si;
-      var curSquareUnits = unitsMap[curSquare];
-
-      // Maintain list of the current square's peers
-      var curSquarePeers = [];
-
-      // Look through the current square's units map...
-      for (var sui in curSquareUnits) {
-        var curUnit = sui;
-
-        for (var ui in curUnit) {
-          var curUnitSquare = ui;
-
-          if (curSquarePeers.indexOf(curUnitSquare) == -1 &&
-              curUnitSquare != curSquare) {
-            curSquarePeers.add(curUnitSquare);
-          }
-        }
-      }
-
-      // Save the current square an its associated peers to the map
-      squarePeersMap[curSquare] = curSquarePeers;
-    }
-
-    return squarePeersMap;
-  }
-
-  List<String> cross(String a, String b) {
-    /* Cross product of all elements in `a` and `b`, e.g.,
-        sudoku._cross("abc", "123") ->
-        ["a1", "a2", "a3", "b1", "b2", "b3", "c1", "c2", "c3"]
-        */
-    List<String> result = [];
-    List aList = a.split('');
-    List bList = b.split('');
-    for (var ai in aList) {
-      for (var bi in bList) {
-        result.add('$ai$bi');
-      }
-    }
-    return result;
-  }
-
-  int? generateFromStr(String? difficultyStr) {
-    int? difficultyInt;
-    if (difficultyMap.containsKey(difficultyStr ?? '')) {
-      difficultyInt = difficultyMap[difficultyStr ?? ''];
-    }
-    generate(difficultyInt);
-
-    return difficultyInt;
-  }
-
+  ///生成数独
   String generate(int? difficulty, {bool unique = true}) {
     // Force difficulty between 17 and 81 inclusive
     difficulty = forceRange(difficulty, nrSquares + 1, minGivens);
@@ -178,7 +62,7 @@ class SudokuGeneratorV2 {
       var square = si;
       // If an assignment of a random chioce causes a contradictoin, give
       // up and try again
-      var randCandidateIdx = _rand_range(candidates[square]?.length);
+      var randCandidateIdx = _randRange(candidates[square]?.length);
       var randCandidate = candidates[square]?[randCandidateIdx];
       if (_assign(candidates, square, randCandidate ?? '').isEmpty) {
         break;
@@ -197,7 +81,7 @@ class SudokuGeneratorV2 {
       // If we have at least difficulty, and the unique candidate count is
       // at least 8, return the puzzle!
       if (singleCandidates.length >= difficulty &&
-          _strip_dups(singleCandidates).length >= 8) {
+          _stripDups(singleCandidates).length >= 8) {
         var board = "";
         List<int> givensIdxs = [];
         for (var i = 0; i < squares.length; i++) {
@@ -235,6 +119,116 @@ class SudokuGeneratorV2 {
     return generate(difficulty);
   }
 
+  List<List<String>> _getAllUnits(String rows, String cols) {
+    /* Return a list of all units (rows, cols, boxes)
+        */
+    List<List<String>> units = [];
+    List rowList = rows.split('');
+    // Rows
+    for (var ri in rowList) {
+      units.add(cross(ri, cols));
+    }
+    List colsList = cols.split('');
+    // Columns
+    for (var ci in colsList) {
+      units.add(cross(rows, ci));
+    }
+
+    // Boxes
+    var rowSquares = ["ABC", "DEF", "GHI"];
+    var colSquares = ["123", "456", "789"];
+
+    for (var rsi in rowSquares) {
+      for (var csi in colSquares) {
+        units.add(cross(rsi, csi));
+      }
+    }
+
+    return units;
+  }
+
+  Map<String, List<List<String>>> _getSquareUnitsMap(
+      List<String> squares, List<List<String>> units) {
+    /* Return a map of `squares` and their associated units (row, col, box)
+        */
+    Map<String, List<List<String>>> squareUnitMap = {};
+
+    // For every square...
+    for (var si in squares) {
+      var curSquare = si;
+
+      // Maintain a list of the current square's units
+      List<List<String>> curSquareUnits = [];
+
+      // Look through the units, and see if the current square is in it,
+      // and if so, add it to the list of of the square's units.
+      for (var ui in units) {
+        var curUnit = ui;
+
+        if (curUnit.contains(curSquare)) {
+          curSquareUnits.add(curUnit);
+        }
+      }
+
+      // Save the current square and its units to the map
+      squareUnitMap[curSquare] = curSquareUnits;
+    }
+
+    return squareUnitMap;
+  }
+
+  Map<String, List<String>> getSquarePeersMap(
+      List<String> squares, Map<String, List<List<String>>> unitsMap) {
+    /* Return a map of `squares` and their associated peers, i.e., a set of
+        other squares in the square's unit.
+        */
+    Map<String, List<String>> squarePeersMap = {};
+
+    // For every square...
+    for (var si in squares) {
+      var curSquare = si;
+      var curSquareUnits = unitsMap[curSquare];
+
+      // Maintain list of the current square's peers
+      List<String> curSquarePeers = [];
+
+      // Look through the current square's units map...
+      for (var sui in curSquareUnits!) {
+        var curUnit = sui;
+
+        for (var ui in curUnit) {
+          var curUnitSquare = ui;
+
+          if (!curSquarePeers.contains(curUnitSquare) &&
+              curUnitSquare != curSquare) {
+            curSquarePeers.add(curUnitSquare);
+          }
+        }
+      }
+
+      // Save the current square an its associated peers to the map
+      squarePeersMap[curSquare] = curSquarePeers;
+    }
+
+    return squarePeersMap;
+  }
+
+  List<String> cross(String a, String b) {
+    /* Cross product of all elements in `a` and `b`, e.g.,
+        sudoku._cross("abc", "123") ->
+        ["a1", "a2", "a3", "b1", "b2", "b3", "c1", "c2", "c3"]
+        */
+    List<String> result = [];
+    List aList = a.split('');
+    List bList = b.split('');
+    for (var ai in aList) {
+      for (var bi in bList) {
+        result.add('$ai$bi');
+      }
+    }
+    return result;
+  }
+
   // Solve
   // -------------------------------------------------------------------------
   String solve(String board, {bool? reverse}) {
@@ -257,7 +251,7 @@ class SudokuGeneratorV2 {
     var nrGivens = 0;
     List boardList = board.split('');
     for (var i = 0; i < boardList.length; i++) {
-      if (board[i] != blankChar && inStr(board[i], digits)) {
+      if (board[i] != blankChar && _inStr(board[i], digits)) {
         ++nrGivens;
       }
     }
@@ -313,7 +307,7 @@ class SudokuGeneratorV2 {
 
     // Choose the blank square with the fewest possibilities > 1
     var minNrCandidates = 10;
-    var minCandidatesSquare;
+    String? minCandidatesSquare;
     for (var i = 0; i < squares.length; i++) {
       var square = (squares)[i];
 
@@ -341,7 +335,7 @@ class SudokuGeneratorV2 {
           candidatesCopy[key] = value;
         });
         var candidatesNext =
-            _search(_assign(candidatesCopy, minCandidatesSquare, val));
+            _search(_assign(candidatesCopy, minCandidatesSquare ?? '', val));
 
         if (candidatesNext.isNotEmpty) {
           return candidatesNext;
@@ -356,7 +350,7 @@ class SudokuGeneratorV2 {
         // TODO: Implement a non-rediculous deep copy function
         var candidatesCopy = jsonDecode(jsonEncode(candidates));
         var candidatesNext = _search(
-            _assign(candidatesCopy, minCandidatesSquare, val),
+            _assign(candidatesCopy, minCandidatesSquare ?? '', val),
             reverse: reverse);
 
         if (candidatesNext.isNotEmpty) {
@@ -370,11 +364,11 @@ class SudokuGeneratorV2 {
     return {};
   }
 
-  _strip_dups(seq) {
+  List<String> _stripDups(seq) {
     /* Strip duplicate values from `seq`
         */
-    var seqSet = [];
-    var dupMap = {};
+    List<String> seqSet = [];
+    Map<String, bool> dupMap = {};
     for (var i in seq) {
       // var e = seq[i];
       var e = i;
@@ -397,7 +391,7 @@ class SudokuGeneratorV2 {
     }
 
     for (var i = 0; i < seq.length; i++) {
-      var ti = _rand_range(seq.length);
+      var ti = _randRange(seq.length);
 
       while (shuffled[ti].isNotEmpty) {
         ti = (ti + 1) > (seq.length - 1) ? 0 : (ti + 1);
@@ -420,7 +414,7 @@ class SudokuGeneratorV2 {
     }
 
     for (var i = 0; i < seq.length; i++) {
-      var ti = _rand_range(seq.length);
+      var ti = _randRange(seq.length);
 
       while (shuffled[ti] != 0) {
         ti = (ti + 1) > (seq.length - 1) ? 0 : (ti + 1);
@@ -432,7 +426,7 @@ class SudokuGeneratorV2 {
     return shuffled;
   }
 
-  int _rand_range(int? max, {int? min}) {
+  int _randRange(int? max, {int? min}) {
     /* Get a random integer in the range of `min` to `max` (non inclusive).
         If `min` not defined, default to 0. If `max` not defined, throw an
         error.
@@ -455,6 +449,45 @@ class SudokuGeneratorV2 {
     return nr ?? 0;
   }
 
+
+  List<List<String>> getCandidates(String board){
+    /* Return all possible candidatees for each square as a grid of
+        candidates, returnning `false` if a contradiction is encountered.
+
+        Really just a wrapper for sudoku._get_candidates_map for programmer
+        consumption.
+        */
+
+    // Assure a valid board
+    var report = validateBoard(board);
+    if(report != true){
+      throw report;
+    }
+
+    // Get a candidates map
+    var candidatesMap = getCandidatesMap(board);
+
+    // If there's an error, return false
+    if(candidatesMap.isEmpty){
+      return [];
+    }
+
+    // Transform candidates map into grid
+    List<List<String>> rows = [];
+    List<String> curRow = [];
+    var i = 0;
+    candidatesMap.forEach((key, square) {
+      var candidates = square;
+      curRow.add(candidates);
+      if(i % 9 == 8){
+        rows.add(curRow);
+        curRow = [];
+      }
+      ++i;
+    });
+    return rows;
+  }
+
   Map<String, String> getCandidatesMap(String board) {
     /* Get all possible candidates for each square as a map in the form
         {square: sudoku.DIGITS} using recursive constraint propagation. Return `false`
@@ -468,7 +501,7 @@ class SudokuGeneratorV2 {
     }
 
     Map<String, String> candidateMap = {};
-    Map squaresValuesMap = _get_square_vals_map(board);
+    Map squaresValuesMap = _getSquareValsMap(board);
 
     // Start by assigning every digit as a candidate to every square
     for (var si in squares) {
@@ -480,7 +513,7 @@ class SudokuGeneratorV2 {
     squaresValuesMap.forEach((key, value) {
       var square = key;
       var val = value;
-      if (inStr(val, digits)) {
+      if (_inStr(val, digits)) {
         var newCandidates = _assign(candidateMap, square, val);
 
         // Fail if we can't assign val to square
@@ -505,32 +538,37 @@ class SudokuGeneratorV2 {
     return candidateMap;
   }
 
-  validateBoard(String board) {
+  bool validateBoard(String board) {
     /* Return if the given `board` is valid or not. If it's valid, return
         true. If it's not, return a string of the reason why it's not.
         */
 
     // Check for empty board
     if (board.isEmpty) {
-      return "Empty board";
+      debugPrint('Empty board');
+      return false;
     }
 
     // Invalid board length
     if (board.length != nrSquares) {
-      return "Invalid board size. Board must be exactly $nrSquares squares.";
+      debugPrint(
+          'Invalid board size. Board must be exactly $nrSquares squares.');
+      return false;
     }
 
     // Check for invalid characters
     for (var i = 0; i < board.length; i++) {
-      if (!inStr(board[i], digits) && board[i] != blankChar) {
-        return "${"Invalid board character encountered at index $i"}: ${board[i]}";
+      if (!_inStr(board[i], digits) && board[i] != blankChar) {
+        debugPrint(
+            '${"Invalid board character encountered at index $i"}: ${board[i]}');
+        return false;
       }
     }
     // Otherwise, we're good. Return true.
     return true;
   }
 
-  bool inStr(String v, String seq) {
+  bool _inStr(String v, String seq) {
     /* Return if a value `v` is in sequence `seq`.
         */
     return seq.contains(v);
@@ -562,10 +600,10 @@ class SudokuGeneratorV2 {
     return candidates;
   }
 
-  Map _get_square_vals_map(board) {
+  Map<String, String> _getSquareValsMap(String board) {
     /* Return a map of squares -> values
         */
-    var squaresValsMap = {};
+    Map<String, String> squaresValsMap = {};
 
     // Make sure `board` is a string of length 81
     if (board.length != squares.length) {
@@ -593,7 +631,7 @@ class SudokuGeneratorV2 {
     // LoggerUtil.d('square:$square val:$val candidate:$candidate');
     // If `val` has already been eliminated from candidates[square], return
     // with candidates.
-    if (!inStr(val, candidates[square] ?? '')) {
+    if (!_inStr(val, candidates[square] ?? '')) {
       return candidates;
     }
 
@@ -610,7 +648,7 @@ class SudokuGeneratorV2 {
     if (nrCandidates == 1) {
       var targetVal = candidates[square];
 
-      for (var pi in SQUARE_PEERS_MAP[square]) {
+      for (var pi in squarePeersMap[square]) {
         // var peer = SQUARE_PEERS_MAP[square][pi];
         var peer = pi;
 
@@ -629,21 +667,21 @@ class SudokuGeneratorV2 {
     }
 
     // If a unit is reduced to only one place for a value, then assign it
-    for (var ui in SQUARE_UNITS_MAP[square]) {
+    for (var ui in squareUnitsMap[square]!) {
       // var unit = SQUARE_UNITS_MAP[square][ui];
       var unit = ui;
       var valPlaces = [];
       for (var si in unit) {
         // var unit_square = unit[si];
         var unitSquare = si;
-        if (inStr(val, candidates[unitSquare] ?? '')) {
+        if (_inStr(val, candidates[unitSquare] ?? '')) {
           valPlaces.add(unitSquare);
         }
       }
 
       // If there's no place for this value, we have a contradition!
       // return false
-      if (valPlaces.length == 0) {
+      if (valPlaces.isEmpty) {
         return {};
 
         // Otherwise the value can only be in one place. Assign it there.
@@ -658,4 +696,37 @@ class SudokuGeneratorV2 {
 
     return candidates;
   }
+
+
+  // Conversions
+  // -------------------------------------------------------------------------
+  List<List<String>> boardStrToGrid(String boardStr){
+    /* Convert a board string to a two-dimensional array
+        */
+    List<List<String>> rows = [];
+    List<String> curRow = [];
+    List<String> boardStrList = boardStr.split('');
+    for(var i = 0 ; i < boardStrList.length ; i++){
+      curRow.add(boardStrList[i]);
+      if(i % 9 == 8){
+        rows.add(curRow);
+        curRow = [];
+      }
+    }
+    return rows;
+  }
+
+  String boardGridToStr(List<List<String>> boardGrid){
+    /* Convert a board grid to a string
+        */
+    String boardStr = "";
+    for(var r = 0; r < 9; ++r){
+      for(var c = 0; c < 9; ++c){
+        boardStr += boardGrid[r][c];
+      }
+    }
+    return boardStr;
+  }
+
+
 }
