@@ -3,5 +3,6 @@
 数独
 
 ## 截图
-![](./doc/image01.png)
+![](./doc/image01.png){:height="100px" width="400px"}
+
 
