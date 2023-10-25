@@ -1,7 +1,4 @@
 
-
-import 'package:flutter_sudoku_v2/utils/logger_util.dart';
-
 import '../sudoku/sudoku_generator.dart';
 
 class SudokuModel {
@@ -11,9 +8,11 @@ class SudokuModel {
   int? gX;
   int? gY;
   ///题目
-  String value;
+  late String value;
   ///用户选择结果
   late String select;
+  ///程序自动生成结果
+  late String solve;
   ///草稿
   late Map<String,String> draftMap;
   ///候选
@@ -23,7 +22,7 @@ class SudokuModel {
 
   SudokuModel({required this.value,required this.pX,required this.pY,required this.gX,required this.gY}){
     // LoggerUtil.d(toString());
-    select = SudokuGenerator.blankChar;
+    solve = select = SudokuGenerator.blankChar;
     draftMap = {};
   }
 
@@ -35,6 +34,19 @@ class SudokuModel {
       candidatesMap![element] = element;
     });
   }
+  ///判断是否争取
+  bool checkCorrect(){
+    bool isCorrect = false;
+    if(value == SudokuGenerator.blankChar){
+      if(select == solve && solve != SudokuGenerator.blankChar){
+        isCorrect = true;
+      }
+    }else{
+      isCorrect = true;
+    }
+    return isCorrect;
+  }
+
 
   @override
   String toString() {

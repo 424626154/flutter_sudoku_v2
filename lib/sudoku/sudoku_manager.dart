@@ -22,7 +22,7 @@ class SudokuManager {
 
   SudokuGenerator? generator ;
 
-  List<List<String>>? board;
+  // List<List<String>>? board;
 
   void init(){
     generator = SudokuGenerator();
@@ -37,19 +37,25 @@ class SudokuManager {
     return board;
   }
 
-  void showPuzzle(String puzzle){
-    var boardStr = generator?.generateFromStr(puzzle);
-    board = generator?.boardStrToGrid(boardStr ?? '');
-    LoggerUtil.d(board);
-  }
+  // void showPuzzle(String puzzle){
+  //   var boardStr = generator?.generateFromStr(puzzle);
+  //   List<List<String>>? board = generator?.boardStrToGrid(boardStr ?? '');
+  //   LoggerUtil.d(board);
+  // }
 
-  void solvePuzzle(){
+  List<List<String>>? solvePuzzle(List<List<String>>? board){
+    if(board?.isEmpty ?? false){
+      LoggerUtil.e('board isEmpty');
+      return [];
+    }
     String? boardStr = generator?.boardGridToStr(board ?? []);
     String? solveStr  = generator?.solve(boardStr ?? '');
+    LoggerUtil.d('solveStr:$solveStr');
     List<List<String>>? solve = generator?.boardStrToGrid(solveStr ?? '');
     solve?.forEach((element) {
       LoggerUtil.d(element);
     });
+    return solve;
   }
 
   List<List<String>>? getCandidates(List<List<String>>? board,{String puzzle = 'easy'}) {

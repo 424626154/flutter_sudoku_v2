@@ -5,12 +5,14 @@ import 'package:get/get.dart';
 import 'pages/home_page.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     //填入设计稿中设备的屏幕尺寸,单位dp
@@ -24,7 +26,7 @@ class MyApp extends StatelessWidget {
           home: child,
         );
       },
-      child: GetMaterialApp(home: HomePage(),),
+      child: const GetMaterialApp(home: HomePage(),),
     );
   }
 }

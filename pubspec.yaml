@@ -38,6 +38,7 @@ dependencies:
   get: ^4.6.5
   flutter_screenutil: ^5.9.0
   logger: ^2.0.1
+  intl: ^0.18.1
 
 dev_dependencies:
   flutter_test:

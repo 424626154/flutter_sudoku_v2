@@ -1,5 +1,7 @@
 import 'dart:math';
 
+import 'package:flutter_sudoku_v2/utils/logger_util.dart';
+
 void main() {
   generateSudoku(3); // 生成简单难度的数独
   generateSudoku(5); // 生成中等难度的数独
@@ -38,9 +40,9 @@ void generateSudoku(int difficultyLevel) {
   // 输出数独网格
   for (int i = 0; i < 9; i++) {
     for (int j = 0; j < 9; j++) {
-      print(sudoku[i][j]);
+      LoggerUtil.d(sudoku[i][j]);
     }
-    print( ' end: ');
+    LoggerUtil.d( ' end: ');
   }
 }
 

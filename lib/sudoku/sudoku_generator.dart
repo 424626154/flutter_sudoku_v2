@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_sudoku_v2/sudoku/difficulty_levels.dart';
+import 'package:flutter_sudoku_v2/utils/logger_util.dart';
 
 ///参考算法 https://github.com/robatron/sudoku.js/blob/master/sudoku.js
 class SudokuGenerator {
@@ -717,6 +718,10 @@ class SudokuGenerator {
   }
 
   String boardGridToStr(List<List<String>> boardGrid){
+    if(boardGrid.length != 9){
+      LoggerUtil.e('boardGridToStr boardGrid length:${boardGrid.length} is error ');
+      return '';
+    }
     /* Convert a board grid to a string
         */
     String boardStr = "";

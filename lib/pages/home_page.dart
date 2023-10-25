@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_sudoku_v2/apps/app_assets.dart';
 import 'package:flutter_sudoku_v2/apps/app_theme.dart';
-import 'package:flutter_sudoku_v2/sudoku/sudoku_generator.dart';
 import 'package:get/get.dart';
 
+import '../controller/sudoku_controller.dart';
+import '../sudoku/difficulty_levels.dart';
 import 'game_page.dart';
 
 
@@ -18,6 +19,9 @@ class HomePage extends StatefulWidget {
 }
 
 class _PageState extends State<HomePage> {
+
+  SudokuController controller = Get.put(SudokuController());
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -53,17 +57,98 @@ class _PageState extends State<HomePage> {
                         color: AppTheme.primaryColor
                     ),
                     alignment: Alignment.center,
-                    child: const Text('单机模式',style: TextStyle(color: Colors.white),),
+                    child: const Text('简单',style: TextStyle(color: Colors.white),),
                   ),
                   onTap: (){
+                    controller.setLevel(DifficultyLevels.easy);
                     Get.to(const GamePage());
-                    // SudokuGenerator generator = SudokuGenerator();
-                    // var board = generator.generate(60); // 生成难度为 5 的数独谜题
-                    // debugPrint('board:$board size:${board.length}');
-                    // var board1 = generator.solve(board);
-                    // debugPrint('board1:$board1 size:${board1.length}');
                   },
-                )
+                ),
+                Container(height: 8.h,),
+                GestureDetector(
+                  child: Container(
+                    width: 200.w,
+                    height: 40.h,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(30.r)),
+                        color: AppTheme.primaryColor
+                    ),
+                    alignment: Alignment.center,
+                    child: const Text('中等',style: TextStyle(color: Colors.white),),
+                  ),
+                  onTap: (){
+                    controller.setLevel(DifficultyLevels.medium);
+                    Get.to(const GamePage());
+                  },
+                ),
+                Container(height: 8.h,),
+                GestureDetector(
+                  child: Container(
+                    width: 200.w,
+                    height: 40.h,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(30.r)),
+                        color: AppTheme.primaryColor
+                    ),
+                    alignment: Alignment.center,
+                    child: const Text('困难',style: TextStyle(color: Colors.white),),
+                  ),
+                  onTap: (){
+                    controller.setLevel(DifficultyLevels.hard);
+                    Get.to(const GamePage());
+                  },
+                ),
+                Container(height: 8.h,),
+                GestureDetector(
+                  child: Container(
+                    width: 200.w,
+                    height: 40.h,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(30.r)),
+                        color: AppTheme.primaryColor
+                    ),
+                    alignment: Alignment.center,
+                    child: const Text('极难',style: TextStyle(color: Colors.white),),
+                  ),
+                  onTap: (){
+                    controller.setLevel(DifficultyLevels.veryHard);
+                    Get.to(const GamePage());
+                  },
+                ),
+                Container(height: 8.h,),
+                GestureDetector(
+                  child: Container(
+                    width: 200.w,
+                    height: 40.h,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(30.r)),
+                        color: AppTheme.primaryColor
+                    ),
+                    alignment: Alignment.center,
+                    child: const Text('专家',style: TextStyle(color: Colors.white),),
+                  ),
+                  onTap: (){
+                    controller.setLevel(DifficultyLevels.insane);
+                    Get.to(const GamePage());
+                  },
+                ),
+                Container(height: 8.h,),
+                GestureDetector(
+                  child: Container(
+                    width: 200.w,
+                    height: 40.h,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(30.r)),
+                        color: AppTheme.primaryColor
+                    ),
+                    alignment: Alignment.center,
+                    child: const Text('骨灰',style: TextStyle(color: Colors.white),),
+                  ),
+                  onTap: (){
+                    controller.setLevel(DifficultyLevels.inhuman);
+                    Get.to(const GamePage());
+                  },
+                ),
               ],
             ),
             Row(

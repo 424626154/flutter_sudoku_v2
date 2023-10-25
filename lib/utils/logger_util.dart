@@ -24,20 +24,20 @@ class LoggerUtil {
     _debugMode = isDebug;
   }
 
-  static void v(Object? object, {String? tag}) {
+  static void t(Object? object, {String? tag}) {
     if (_debugMode) {
-      _logger.v('${tag ?? _tagValue} v | ${object?.toString()}');
+      _logger.t('${tag ?? _tagValue} v | ${object?.toString()}');
     }
   }
 
   static void d(Object? object, {String? tag}) {
     if (_debugMode) {
-      _logger.v('${tag ?? _tagValue} d | ${object?.toString()}');
+      _logger.t('${tag ?? _tagValue} d | ${object?.toString()}');
     }
   }
 
   static void i(Object? object, {String? tag}) {
-      _logger.v('${tag ?? _tagValue} i | ${object?.toString()}');
+      _logger.i('${tag ?? _tagValue} i | ${object?.toString()}');
   }
 
   static void w(Object? object, {String? tag}) {
@@ -49,8 +49,8 @@ class LoggerUtil {
   }
 
 
-  static void wtf(Object? object, {String? tag}) {
-    _logger.wtf('${tag ?? _tagValue} wtf | ${object?.toString()}');
+  static void f(Object? object, {String? tag}) {
+    _logger.f('${tag ?? _tagValue} wtf | ${object?.toString()}');
   }
 
   static void l(String message){

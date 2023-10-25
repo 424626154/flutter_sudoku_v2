@@ -21,6 +21,19 @@ class SudukuGroupMode {
     }
   }
 
+  bool checkGroupCorrect(){
+    bool isGroupCorrect = true;
+    for (var items in gropup) {
+      for (var item in items) {
+        isGroupCorrect = item.checkCorrect();
+        if(isGroupCorrect == false){
+          return isGroupCorrect;
+        }
+      }
+    }
+    return isGroupCorrect;
+  }
+
   @override
   String toString() {
     return {

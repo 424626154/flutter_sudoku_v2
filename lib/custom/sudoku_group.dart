@@ -7,20 +7,20 @@ import '../controller/sudoku_controller.dart';
 import '../models/sudoku_group_model.dart';
 
 class SudokuGroup extends StatelessWidget {
-  SudukuGroupMode groupData;
-  double? rowW;
-  SudokuController? controller;
-  SudokuGroup({super.key,required this.groupData,required this.rowW,required this.controller});
+  final SudukuGroupMode groupData;
+  final double? rowW;
+  final SudokuController? controller;
+  const SudokuGroup({super.key,required this.groupData,required this.rowW,required this.controller});
   @override
   Widget build(BuildContext context) {
     var rowsDaota = groupData.gropup;
-    return Container(
+    return SizedBox(
       width: (rowW ?? 0)*3,
       height: (rowW ?? 0)*3,
       child: Column(
-        children: List.generate(rowsDaota?.length ?? 0, (index){
-          var rows = (rowsDaota ?? [])[index];
-          return Container(
+        children: List.generate(rowsDaota.length, (index){
+          var rows = (rowsDaota)[index];
+          return SizedBox(
             width: (rowW ?? 0)*3,
             height: (rowW ?? 0),
             child: Row(
